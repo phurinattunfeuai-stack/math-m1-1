@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>คณิตศาสตร์ ม.1 — ระบบตรวจงาน</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;--bg2:#f5f5f5;--bg3:#ebebeb;
+  --text:#1a1a1a;--text2:#666;--text3:#999;
+  --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);
+  --radius:8px;--radius-lg:12px;
+  --green-bg:#EAF3DE;--green:#3B6D11;--green-bd:#97C459;
+  --amber-bg:#FAEEDA;--amber:#854F0B;--amber-bd:#EF9F27;
+  --blue-bg:#E6F1FB;--blue:#185FA5;
+  --red:#A32D2D;--red-bg:#FCEBEB;
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#1e1e1e;--bg2:#272727;--bg3:#2f2f2f;--text:#f0f0f0;--text2:#aaa;--text3:#777;
+    --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+    --green-bg:#1a2e10;--green:#97C459;--green-bd:#3B6D11;
+    --amber-bg:#2e2210;--amber:#EF9F27;--amber-bd:#854F0B;
+    --blue-bg:#0d1e33;--blue:#85B7EB;--red:#F09595;--red-bg:#2e1010;}
+}
+body{font-family:'Sarabun',sans-serif;background:var(--bg3);color:var(--text);min-height:100vh}
+.app{max-width:480px;margin:0 auto;background:var(--bg3);min-height:100vh}
+.header{background:var(--bg);border-bottom:.5px solid var(--border);padding:12px 16px;position:sticky;top:0;z-index:100}
+.header h1{font-size:16px;font-weight:600;color:var(--text)}
+.header p{font-size:11px;color:var(--text2);margin-top:1px}
+.sync-bar{display:flex;align-items:center;gap:6px;padding:5px 14px;background:var(--bg2);border-bottom:.5px solid var(--border);font-size:11px;color:var(--text2);min-height:24px}
+.dot{width:7px;height:7px;border-radius:50%;background:#ccc;flex-shrink:0}
+.dot.online{background:#4caf50;animation:pulse 2s infinite}
+.dot.syncing{background:#ff9800;animation:spin 1s linear infinite}
+.dot.offline{background:#f44336}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tabs{display:flex;border-bottom:.5px solid var(--border);background:var(--bg);overflow-x:auto}
+.tab{flex:1;min-width:72px;padding:10px 6px;font-size:13px;color:var(--text2);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;text-align:center;font-family:'Sarabun',sans-serif}
+.tab.active{color:var(--text);border-bottom-color:var(--text);font-weight:600}
+.section{display:none;padding:12px}
+.section.active{display:block}
+.card{background:var(--bg);border:.5px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:10px}
+label{display:block;font-size:12px;color:var(--text2);margin-bottom:4px;margin-top:10px}
+label:first-child{margin-top:0}
+input[type=text],input[type=number],input[type=date],select{
+  width:100%;padding:9px 11px;font-size:14px;border:.5px solid var(--border2);
+  border-radius:var(--radius);background:var(--bg);color:var(--text);
+  font-family:'Sarabun',sans-serif;outline:none}
+input:focus,select:focus{border-color:#378ADD}
+.btn{display:block;width:100%;padding:11px;font-size:14px;font-weight:600;border-radius:var(--radius);
+  border:.5px solid var(--border2);background:var(--bg);color:var(--text);cursor:pointer;
+  font-family:'Sarabun',sans-serif;margin-top:10px}
+.btn-primary{background:var(--text);color:var(--bg);border-color:var(--text)}
+.btn-sm{width:auto;padding:5px 11px;font-size:12px;margin-top:0}
+.btn-danger{border-color:#E24B4A;color:#E24B4A;background:none}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-blue{background:var(--blue-bg);color:var(--blue)}
+.badge-amber{background:var(--amber-bg);color:var(--amber)}
+.flex-gap{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.student-item{border-bottom:.5px solid var(--border);padding:9px 0}
+.student-item:last-child{border-bottom:none}
+.name14{font-size:14px;font-weight:600;color:var(--text)}
+.name13{font-size:13px;font-weight:500;color:var(--text)}
+.sub12{font-size:12px;color:var(--text2);margin-top:1px}
+.sub11{font-size:11px;color:var(--text3)}
+.status-btn{padding:5px 10px;font-size:11px;font-weight:600;border-radius:20px;
+  border:.5px solid var(--border2);cursor:pointer;background:var(--bg2);color:var(--text2);font-family:'Sarabun',sans-serif}
+.status-btn.submitted{background:var(--green-bg);color:var(--green);border-color:var(--green-bd)}
+.status-btn.late{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-bd)}
+.status-btn.missing{background:var(--red-bg);color:var(--red);border-color:#E24B4A}
+.empty{text-align:center;color:var(--text3);font-size:13px;padding:24px 0}
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.stat-card{background:var(--bg2);border-radius:var(--radius);padding:14px;text-align:center}
+.stat-num{font-size:26px;font-weight:700;color:var(--text)}
+.stat-label{font-size:11px;color:var(--text2);margin-top:2px}
+.search-box{padding:9px 11px;font-size:14px;border:.5px solid var(--border2);border-radius:var(--radius);
+  background:var(--bg);color:var(--text);width:100%;margin-bottom:10px;font-family:'Sarabun',sans-serif;outline:none}
+.scan-box{background:var(--bg2);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px;text-align:center}
+#scan-video{display:none;width:100%;border-radius:var(--radius);margin-top:10px;max-height:280px;object-fit:cover}
+.scan-msg{margin-top:10px;padding:10px 14px;border-radius:var(--radius);font-size:13px;font-weight:600;display:none}
+.scan-ok{background:var(--green-bg);color:var(--green)}
+.scan-err{background:var(--red-bg);color:var(--red)}
+.assign-sel{width:100%;padding:7px 10px;font-size:13px;border:.5px solid var(--border2);border-radius:var(--radius);
+  background:var(--bg);color:var(--text);font-family:'Sarabun',sans-serif;margin-bottom:10px}
+.filter-btn{flex:1;min-width:60px;padding:6px 4px;font-size:11px;font-weight:600;border-radius:20px;
+  border:.5px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:'Sarabun',sans-serif;text-align:center}
+.filter-btn.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+#qr-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:200;align-items:center;justify-content:center}
+#qr-overlay.open{display:flex}
+.qr-box{background:var(--bg);border-radius:var(--radius-lg);padding:22px;width:270px;text-align:center}
+.qr-box canvas{display:block;margin:12px auto;border-radius:6px}
+.qr-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px}
+.qr-sub{font-size:12px;color:var(--text2)}
+.progress-wrap{background:var(--bg2);border-radius:4px;height:8px;overflow:hidden;margin:8px 0 5px}
+.progress-fill{background:#639922;height:100%;border-radius:4px}
+.summary-foot{display:flex;justify-content:space-between;font-size:12px}
+/* Firebase config modal */
+.cfg-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:300;align-items:center;justify-content:center}
+.cfg-modal.open{display:flex}
+.cfg-box{background:var(--bg);border-radius:var(--radius-lg);padding:20px;width:320px;max-height:90vh;overflow-y:auto}
+.cfg-box h2{font-size:15px;font-weight:700;margin-bottom:4px}
+.cfg-box p{font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5}
+.cfg-box .step{font-size:12px;color:var(--text2);margin-bottom:6px;padding:6px 10px;background:var(--bg2);border-radius:6px;line-height:1.6}
+.cfg-box .step b{color:var(--text)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>📐 คณิตศาสตร์ ม.1</h1>
+    <p id="hdr-sub">ระบบตรวจงาน &amp; QR Code นักเรียน</p>
+  </div>
+  <div class="sync-bar">
+    <div class="dot" id="sync-dot"></div>
+    <span id="sync-label">กำลังเชื่อมต่อ...</span>
+    <span style="margin-left:auto;cursor:pointer;color:var(--blue)" onclick="openCfg()">⚙ ตั้งค่า Firebase</span>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('assignments')"><i class="ti ti-clipboard-list"></i> งาน</button>
+    <button class="tab" onclick="switchTab('students')"><i class="ti ti-users"></i> นักเรียน</button>
+    <button class="tab" onclick="switchTab('check')"><i class="ti ti-qrcode"></i> สแกน</button>
+    <button class="tab" onclick="switchTab('summary')"><i class="ti ti-chart-bar"></i> สรุป</button>
+  </div>
+
+  <!-- ASSIGNMENTS -->
+  <div id="tab-assignments" class="section active">
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px"><i class="ti ti-plus"></i> เพิ่มงานใหม่</div>
+      <label>ชื่องาน / เรื่อง</label>
+      <input id="a-title" type="text" placeholder="เช่น แบบฝึกหัด 1.1 จำนวนเต็ม">
+      <label>คะแนนเต็ม</label>
+      <input id="a-score" type="number" placeholder="10" min="1">
+      <label>วันกำหนดส่ง</label>
+      <input id="a-date" type="date">
+      <button class="btn btn-primary" onclick="addAssignment()"><i class="ti ti-plus"></i> เพิ่มงาน</button>
+    </div>
+    <div id="assignment-list"></div>
+  </div>
+
+  <!-- STUDENTS -->
+  <div id="tab-students" class="section">
+    <input class="search-box" type="text" placeholder="🔍 ค้นหานักเรียน..." oninput="renderStudents(this.value)">
+    <div class="card" style="padding:10px 14px"><div id="student-list"></div></div>
+  </div>
+
+  <!-- SCAN -->
+  <div id="tab-check" class="section">
+    <div class="scan-box">
+      <div style="font-size:36px;margin-bottom:6px">📱</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:4px">สแกน QR Code นักเรียน</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px">เปิดกล้องแล้วจ่อ QR Code ของนักเรียน</div>
+      <button class="btn btn-primary" id="scan-btn" onclick="toggleScan()"><i class="ti ti-scan"></i> เปิดกล้องสแกน</button>
+      <video id="scan-video" playsinline autoplay muted></video>
+      <canvas id="scan-canvas" style="display:none"></canvas>
+      <div class="scan-msg" id="scan-msg"></div>
+    </div>
+    <label style="margin-bottom:6px">เลือกงานที่ต้องการตรวจ</label>
+    <select class="assign-sel" id="check-sel" onchange="renderCheckList()">
+      <option value="">-- เลือกงาน --</option>
+    </select>
+    <div id="check-filter-bar" style="display:none;margin-bottom:8px;">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+        <button class="filter-btn active" onclick="setFilter('all')" id="f-all">ทั้งหมด <span id="f-all-n"></span></button>
+        <button class="filter-btn" onclick="setFilter('submitted')" id="f-submitted">✓ ส่งแล้ว <span id="f-sub-n"></span></button>
+        <button class="filter-btn" onclick="setFilter('late')" id="f-late">⏱ ช้า <span id="f-late-n"></span></button>
+        <button class="filter-btn" onclick="setFilter('missing')" id="f-missing">✗ ไม่ส่ง <span id="f-miss-n"></span></button>
+      </div>
+      <input class="search-box" type="text" placeholder="🔍 ค้นหาชื่อ..." oninput="renderCheckList()" id="check-search" style="margin-bottom:0">
+    </div>
+    <div id="check-list"></div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div id="tab-summary" class="section">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num">45</div><div class="stat-label">นักเรียนทั้งหมด</div></div>
+      <div class="stat-card"><div class="stat-num" id="s-count">0</div><div class="stat-label">งานทั้งหมด</div></div>
+    </div>
+    <div id="summary-list"></div>
+  </div>
+</div>
+
+<!-- ASSIGNMENT DETAIL MODAL -->
+<div id="detail-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:250;align-items:flex-end;justify-content:center;">
+  <div style="background:var(--bg);border-radius:16px 16px 0 0;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;padding:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div>
+        <div id="dm-title" style="font-size:15px;font-weight:700;color:var(--text)"></div>
+        <div id="dm-sub" style="font-size:12px;color:var(--text2);margin-top:2px"></div>
+      </div>
+      <button onclick="closeDetail()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text2)">✕</button>
+    </div>
+    <!-- filter pills -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+      <button class="filter-btn active" onclick="setDetailFilter('all')" id="df-all">ทั้งหมด <span id="df-all-n"></span></button>
+      <button class="filter-btn" onclick="setDetailFilter('submitted')" id="df-submitted">✓ ส่งแล้ว <span id="df-sub-n"></span></button>
+      <button class="filter-btn" onclick="setDetailFilter('late')" id="df-late">⏱ ช้า <span id="df-late-n"></span></button>
+      <button class="filter-btn" onclick="setDetailFilter('missing')" id="df-missing">✗ ไม่ส่ง <span id="df-miss-n"></span></button>
+    </div>
+    <input class="search-box" type="text" placeholder="🔍 ค้นหาชื่อ..." oninput="renderDetailList()" id="detail-search" style="margin-bottom:10px">
+    <div id="detail-list"></div>
+  </div>
+</div>
+
+<!-- QR OVERLAY -->
+<div id="qr-overlay">
+  <div class="qr-box">
+    <div class="qr-name" id="qr-name"></div>
+    <div class="qr-sub" id="qr-sub"></div>
+    <canvas id="qr-canvas" width="200" height="200"></canvas>
+    <button class="btn" onclick="closeQR()" style="margin-top:8px">ปิด</button>
+  </div>
+</div>
+
+<!-- FIREBASE CONFIG MODAL -->
+<div class="cfg-modal" id="cfg-modal">
+  <div class="cfg-box">
+    <h2>🔥 ตั้งค่า Firebase</h2>
+    <p>เพื่อให้ข้อมูลซิงค์ระหว่างทุกเครื่อง ต้องใส่ข้อมูล Firebase ของคุณ</p>
+    <div class="step">
+      <b>วิธีสร้าง Firebase (ฟรี):</b><br>
+      1. เข้า <b>console.firebase.google.com</b><br>
+      2. กด <b>Add project</b> → ตั้งชื่อ → Create<br>
+      3. กด <b>Realtime Database</b> → Create database → Start in test mode<br>
+      4. คัดลอก URL เช่น <b>https://xxx-default-rtdb.firebaseio.com</b>
+    </div>
+    <label>Firebase Database URL</label>
+    <input type="text" id="fb-url" placeholder="https://your-project-default-rtdb.firebaseio.com" value="https://math1-6cc57-default-rtdb.firebaseio.com">
+    <label>รหัสห้องเรียน (ใช้ร่วมกันทุกเครื่อง)</label>
+    <input type="text" id="fb-room" placeholder="math-m1-2568" value="math-m1-2568">
+    <button class="btn btn-primary" onclick="saveCfg()" style="margin-top:12px">บันทึกและเชื่อมต่อ</button>
+    <button class="btn" onclick="closeCfg()" style="margin-top:6px">ยกเลิก</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script>
+const STUDENTS=["นายเตวิช แสงฟ้าใส","นายดนุเดช เกิดกุนที","เด็กหญิงดารุณี ประกายน้ำ","เด็กชายวีรากร โชติรสสกุล","เด็กชายอาทิตย์ ทังสุรชัย","เด็กหญิงอาลิสา","เด็กหญิงชนิดา สุริยะวงศ์","เด็กชายทินกร","เด็กหญิงจารวี วรางค์กรณ์ธาดา","เด็กหญิงวรรณภา เก่งกุญชร","เด็กหญิงจุไรรัตน์ สกุณาเคียงดง","เด็กหญิงอรดา บุญทวีคูณ","เด็กชายสิทธิพันธ์ ฟ้านภาแจ่ม","เด็กหญิงศรัณย์พร ปัญญาจิตเกษม","เด็กชายธนภัทร เก่งกุญชร","เด็กชายปิติ","เด็กหญิงพฤกษา เครือสาร","เด็กหญิงชมพูนุช อิ่มเอมสวัสดิ์","เด็กหญิงลีลาวดี","เด็กหญิงลลิตา","เด็กหญิงนิตา เก่งกุญชร","เด็กชายปิยะ","เด็กหญิงฐิตาภา ใจหยัดยืน","เด็กหญิงเพชรพลอย","เด็กหญิงตุลยา","นายแสงเพชร นาคาม้วนหาง","เด็กหญิงเฟื่องฟ้า","นางสาวการะเกด","เด็กหญิงนันทิวา นิ่มละออ","เด็กชายสนธิ","เด็กหญิงจิดาภา กิตนิทัศน์","เด็กหญิงนุชจิรา","เด็กหญิงจิณห์นิภา คีรีสุเรนทร์","เด็กชายพิศาล ไพรวันไพศาล","นางสาวศศิกานต์ ธนเสรีธรรม","นางสาวนิตยา สถิตย์สาละวิน","นายมาดี","เด็กชายวรเดช ครองวิถี","เด็กหญิงภัทรวดี เกตุประจัน","เด็กชายวีรวิชญ์ กันแย้ม","เด็กหญิงณิชนันท์ กิจการจรัส","เด็กหญิงบ๊วยพอ","นายพาต่าย่อ","เด็กหญิงนิลภา","เด็กหญิงนอลาซี"];
+
+// ── State ────────────────────────────────────────────────────────────────
+let assignments = [];
+let submissions = {};
+const DEFAULT_FB_URL = 'https://math1-6cc57-default-rtdb.firebaseio.com';
+const DEFAULT_FB_ROOM = 'math-m1-2568';
+let fbUrl = localStorage.getItem('fb-url') || DEFAULT_FB_URL;
+let fbRoom = localStorage.getItem('fb-room') || DEFAULT_FB_ROOM;
+let pollTimer = null;
+
+async function fetchAll() {
+  if (!fbUrl) return;
+  try {
+    const data = await fbGet('');
+    if (!data) { assignments = []; submissions = {}; }
+    else {
+      assignments = data.assignments ? Object.values(data.assignments) : [];
+      submissions = data.submissions || {};
+    }
+    renderAll();
+    if (typeof detailAid !== 'undefined' && detailAid) renderDetailList();
+    setSyncStatus('online', 'ออนไลน์ — ซิงค์แล้ว');
+  } catch(e) {
+    setSyncStatus('offline', 'ออฟไลน์ — ตรวจสอบ Firebase URL');
+  }
+}
+
+function startListener() {
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  if (!fbUrl) return;
+  setSyncStatus('syncing', 'กำลังเชื่อมต่อ...');
+  fetchAll();
+  pollTimer = setInterval(fetchAll, 5000);
+}
+
+function setSyncStatus(state, label) {
+  const dot = document.getElementById('sync-dot');
+  dot.className = 'dot ' + state;
+  document.getElementById('sync-label').textContent = label;
+}
+
+// ── Config modal ─────────────────────────────────────────────────────────
+function openCfg() {
+  document.getElementById('fb-url').value = fbUrl;
+  document.getElementById('fb-room').value = fbRoom;
+  document.getElementById('cfg-modal').classList.add('open');
+}
+function closeCfg() { document.getElementById('cfg-modal').classList.remove('open'); }
+function saveCfg() {
+  const u = document.getElementById('fb-url').value.trim().replace(/\/$/, '');
+  const r = document.getElementById('fb-room').value.trim() || 'math-m1-2568';
+  if (!u) { alert('กรุณาใส่ Firebase URL'); return; }
+  fbUrl = u; fbRoom = r;
+  localStorage.setItem('fb-url', u);
+  localStorage.setItem('fb-room', r);
+  closeCfg();
+  startListener();
+}
+
+// ── Tabs ─────────────────────────────────────────────────────────────────
+function switchTab(t) {
+  const names=['assignments','students','check','summary'];
+  document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('active',names[i]===t));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='students') renderStudents('');
+  if(t==='check') refreshCheckSel();
+  if(t==='summary') renderSummary();
+  if(t!=='check' && scanning) stopScan();
+}
+
+function renderAll() {
+  renderAssignments();
+  renderStudents(document.querySelector('.search-box')?.value||'');
+  refreshCheckSel();
+  renderSummary();
+}
+
+// ── Assignments ───────────────────────────────────────────────────────────
+async function addAssignment() {
+  const title = document.getElementById('a-title').value.trim();
+  const score = parseInt(document.getElementById('a-score').value);
+  const date  = document.getElementById('a-date').value;
+  if(!title||!score){alert('กรุณาใส่ชื่องานและคะแนน');return;}
+  if(!fbUrl){alert('กรุณาตั้งค่า Firebase ก่อน');openCfg();return;}
+  const id='a'+Date.now();
+  setSyncStatus('syncing','กำลังบันทึก...');
+  try {
+    await fbSet(`assignments/${id}`,{id,title,score,date});
+    document.getElementById('a-title').value='';
+    document.getElementById('a-score').value='';
+    document.getElementById('a-date').value='';
+  } catch(e){ alert('บันทึกไม่สำเร็จ: '+e.message); setSyncStatus('offline','เกิดข้อผิดพลาด'); }
+}
+
+function renderAssignments() {
+  const el=document.getElementById('assignment-list');
+  document.getElementById('s-count').textContent=assignments.length;
+  if(!assignments.length){el.innerHTML='<div class="empty">ยังไม่มีงาน กรุณาเพิ่มงาน</div>';return;}
+  el.innerHTML=assignments.map((a,i)=>{
+    const done=countDone(a.id);
+    const pct=Math.round(done/45*100);
+    return `<div class="card" style="cursor:pointer" onclick="openDetail('${a.id}')">
+      <div class="row">
+        <div style="flex:1;min-width:0">
+          <div class="name14">${a.title}</div>
+          <div class="sub12">คะแนนเต็ม ${a.score}${a.date?' | ส่งวันที่ '+fmtDate(a.date):''}</div>
+          <div class="progress-wrap" style="margin:6px 0 4px"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div class="flex-gap">
+            <span class="badge badge-blue">ส่งแล้ว ${done}</span>
+            <span class="badge badge-amber">ยังไม่ส่ง ${45-done}</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0" onclick="event.stopPropagation()">
+          <button class="btn btn-sm" onclick="editA('${a.id}',${i})"><i class="ti ti-edit"></i></button>
+          <button class="btn btn-sm btn-danger" onclick="delA('${a.id}')"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function countDone(id) {
+  if(!submissions[id]) return 0;
+  return Object.values(submissions[id]).filter(v=>v==='submitted'||v==='late').length;
+}
+
+async function editA(id, i) {
+  const a=assignments[i];
+  const t=prompt('ชื่องาน:',a.title); if(t===null) return;
+  const s=prompt('คะแนนเต็ม:',a.score); if(s===null) return;
+  const d=prompt('วันกำหนดส่ง (YYYY-MM-DD):',a.date||'');
+  const updated={...a,title:t||a.title,score:parseInt(s)||a.score,date:d!==null?d:a.date};
+  setSyncStatus('syncing','กำลังบันทึก...');
+  try { await fbSet(`assignments/${id}`,updated); }
+  catch(e){ alert('แก้ไขไม่สำเร็จ'); setSyncStatus('offline','เกิดข้อผิดพลาด'); }
+}
+
+async function delA(id) {
+  if(!confirm('ลบงานนี้?')) return;
+  setSyncStatus('syncing','กำลังลบ...');
+  try {
+    await fbDelete(`assignments/${id}`);
+    await fbDelete(`submissions/${id}`);
+  } catch(e){ alert('ลบไม่สำเร็จ'); setSyncStatus('offline','เกิดข้อผิดพลาด'); }
+}
+
+function fmtDate(d) {
+  if(!d) return '';
+  const [y,m,day]=d.split('-');
+  return `${day}/${m}/${parseInt(y)+543}`;
+}
+
+// ── Students ──────────────────────────────────────────────────────────────
+function renderStudents(q='') {
+  const el=document.getElementById('student-list');
+  const list=STUDENTS.map((n,i)=>({n,i})).filter(x=>x.n.includes(q));
+  if(!list.length){el.innerHTML='<div class="empty">ไม่พบนักเรียน</div>';return;}
+  el.innerHTML=list.map(({n,i})=>`
+    <div class="student-item"><div class="row">
+      <div><div class="name13">${n}</div><div class="sub11">เลขที่ ${i+1}</div></div>
+      <button class="btn btn-sm" onclick="showQR(${i})"><i class="ti ti-qrcode"></i> QR</button>
+    </div></div>`).join('');
+}
+
+function showQR(idx) {
+  document.getElementById('qr-overlay').classList.add('open');
+  document.getElementById('qr-name').textContent=STUDENTS[idx];
+  document.getElementById('qr-sub').textContent=`เลขที่ ${idx+1}  |  คณิตศาสตร์ ม.1`;
+  QRCode.toCanvas(document.getElementById('qr-canvas'),
+    JSON.stringify({studentIdx:idx,name:STUDENTS[idx],class:'M1-Math'}),
+    {width:200,margin:2,color:{dark:'#000',light:'#fff'}},()=>{});
+}
+function closeQR(){ document.getElementById('qr-overlay').classList.remove('open'); }
+
+// ── Check list ────────────────────────────────────────────────────────────
+function refreshCheckSel() {
+  const sel=document.getElementById('check-sel');
+  const cur=sel.value;
+  sel.innerHTML='<option value="">-- เลือกงาน --</option>'+
+    assignments.map(a=>`<option value="${a.id}" ${a.id===cur?'selected':''}>${a.title}</option>`).join('');
+  renderCheckList();
+}
+
+let currentFilter = 'all';
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('f-'+f).classList.add('active');
+  renderCheckList();
+}
+
+function renderCheckList() {
+  const aid=document.getElementById('check-sel').value;
+  const el=document.getElementById('check-list');
+  const filterBar=document.getElementById('check-filter-bar');
+  if(!aid){el.innerHTML='';filterBar.style.display='none';return;}
+  filterBar.style.display='block';
+  const sub=submissions[aid]||{};
+  const q=(document.getElementById('check-search')||{}).value||'';
+
+  // count stats
+  let nSub=0,nLate=0,nMiss=0;
+  STUDENTS.forEach((_,i)=>{
+    const st=sub[i]||'missing';
+    if(st==='submitted') nSub++;
+    else if(st==='late') nLate++;
+    else nMiss++;
+  });
+  document.getElementById('f-all-n').textContent=`(${STUDENTS.length})`;
+  document.getElementById('f-sub-n').textContent=`(${nSub})`;
+  document.getElementById('f-late-n').textContent=`(${nLate})`;
+  document.getElementById('f-miss-n').textContent=`(${nMiss})`;
+
+  const rows = STUDENTS.map((n,i)=>({n,i,st:sub[i]||'missing'}))
+    .filter(x => {
+      if(q && !x.n.includes(q)) return false;
+      if(currentFilter==='all') return true;
+      return x.st===currentFilter;
+    });
+
+  if(!rows.length){el.innerHTML='<div class="empty">ไม่พบรายชื่อ</div>';return;}
+
+  el.innerHTML=`<div class="card" style="padding:10px 14px">`+
+    rows.map(({n,i,st})=>{
+      return `<div class="student-item"><div class="row">
+        <div>
+          <div class="name13">${n}</div>
+          <div class="sub11">เลขที่ ${i+1}</div>
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0">
+          <button class="status-btn ${st==='submitted'?'submitted':''}" onclick="setSt('${aid}',${i},'submitted')">✓ ส่ง</button>
+          <button class="status-btn ${st==='late'?'late':''}" onclick="setSt('${aid}',${i},'late')">⏱ ช้า</button>
+          <button class="status-btn ${st==='missing'?'missing':''}" onclick="setSt('${aid}',${i},'missing')">✗</button>
+        </div>
+      </div></div>`;
+    }).join('')+`</div>`;
+}
+
+async function setSt(aid, idx, status) {
+  if(!fbUrl){alert('กรุณาตั้งค่า Firebase ก่อน');openCfg();return;}
+  setSyncStatus('syncing','กำลังบันทึก...');
+  try {
+    await fbPatch(`submissions/${aid}`,{[idx]:status});
+  } catch(e){ setSyncStatus('offline','เกิดข้อผิดพลาด'); }
+}
+
+// ── Summary ───────────────────────────────────────────────────────────────
+function renderSummary() {
+  document.getElementById('s-count').textContent=assignments.length;
+  const el=document.getElementById('summary-list');
+  if(!assignments.length){el.innerHTML='<div class="empty">ยังไม่มีงาน</div>';return;}
+  el.innerHTML=assignments.map(a=>{
+    const done=countDone(a.id);
+    const pct=Math.round(done/45*100);
+    return `<div class="card">
+      <div class="name14" style="margin-bottom:4px">${a.title}</div>
+      <div class="sub12">คะแนนเต็ม ${a.score}${a.date?' | ส่งวันที่ '+fmtDate(a.date):''}</div>
+      <div class="progress-wrap"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="summary-foot">
+        <span style="color:var(--green)">ส่งแล้ว ${done} คน (${pct}%)</span>
+        <span style="color:var(--amber)">ยังไม่ส่ง ${45-done} คน</span>
+      </div></div>`;
+  }).join('');
+}
+
+// ── Scan ──────────────────────────────────────────────────────────────────
+function toggleScan(){ scanning?stopScan():startScan(); }
+
+function startScan() {
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(stream=>{
+    scanStream=stream; scanning=true;
+    const video=document.getElementById('scan-video');
+    video.srcObject=stream; video.style.display='block'; video.play();
+    const btn=document.getElementById('scan-btn');
+    btn.innerHTML='<i class="ti ti-player-stop"></i> หยุดสแกน';
+    btn.style.cssText='background:#A32D2D;border-color:#A32D2D;color:#fff;width:100%;padding:11px;font-size:14px;font-weight:600;border-radius:8px;cursor:pointer;font-family:Sarabun,sans-serif';
+    const canvas=document.getElementById('scan-canvas');
+    function tick(){
+      const v=document.getElementById('scan-video');
+      if(v.readyState===v.HAVE_ENOUGH_DATA){
+        canvas.width=v.videoWidth; canvas.height=v.videoHeight;
+        const ctx=canvas.getContext('2d'); ctx.drawImage(v,0,0);
+        const img=ctx.getImageData(0,0,canvas.width,canvas.height);
+        const code=jsQR(img.data,img.width,img.height);
+        if(code){
+          try{
+            const d=JSON.parse(code.data);
+            if(d.studentIdx!==undefined&&d.class==='M1-Math'){onScan(d);stopScan();return;}
+          }catch(e){}
+        }
+      }
+      rafId=requestAnimationFrame(tick);
+    }
+    rafId=requestAnimationFrame(tick);
+  }).catch(()=>showMsg('ไม่สามารถเปิดกล้องได้',false));
+}
+
+function stopScan(){
+  if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}
+  scanning=false; cancelAnimationFrame(rafId);
+  document.getElementById('scan-video').style.display='none';
+  const btn=document.getElementById('scan-btn');
+  btn.innerHTML='<i class="ti ti-scan"></i> เปิดกล้องสแกน';
+  btn.style.cssText=''; btn.className='btn btn-primary';
+}
+
+async function onScan(d){
+  const aid=document.getElementById('check-sel').value;
+  if(!aid){showMsg('กรุณาเลือกงานก่อนสแกน',false);return;}
+  if(!fbUrl){showMsg('กรุณาตั้งค่า Firebase ก่อน',false);openCfg();return;}
+  setSyncStatus('syncing','กำลังบันทึก...');
+  try {
+    await fbPatch(`submissions/${aid}`,{[d.studentIdx]:'submitted'});
+    showMsg('✓ บันทึกแล้ว: '+d.name+' (เลขที่ '+(d.studentIdx+1)+')',true);
+  } catch(e){ showMsg('บันทึกไม่สำเร็จ',false); }
+}
+
+function showMsg(msg,ok){
+  const el=document.getElementById('scan-msg');
+  el.className='scan-msg '+(ok?'scan-ok':'scan-err');
+  el.textContent=msg; el.style.display='block';
+  setTimeout(()=>el.style.display='none',4000);
+}
+
+// ── Assignment Detail Modal ────────────────────────────────────────────
+let detailAid = null;
+let detailFilter = 'all';
+
+function openDetail(aid) {
+  detailAid = aid;
+  detailFilter = 'all';
+  document.querySelectorAll('[id^="df-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById('df-all').classList.add('active');
+  const a = assignments.find(x => x.id === aid);
+  if (!a) return;
+  document.getElementById('dm-title').textContent = a.title;
+  document.getElementById('dm-sub').textContent = `คะแนนเต็ม ${a.score}` + (a.date ? ` | ส่งวันที่ ${fmtDate(a.date)}` : '');
+  document.getElementById('detail-search').value = '';
+  document.getElementById('detail-modal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  renderDetailList();
+}
+
+function closeDetail() {
+  document.getElementById('detail-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function setDetailFilter(f) {
+  detailFilter = f;
+  document.querySelectorAll('[id^="df-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById('df-' + f).classList.add('active');
+  renderDetailList();
+}
+
+function renderDetailList() {
+  if (!detailAid) return;
+  const sub = submissions[detailAid] || {};
+  const q = document.getElementById('detail-search').value || '';
+  let nSub=0, nLate=0, nMiss=0;
+  STUDENTS.forEach((_,i) => {
+    const st = sub[i]||'missing';
+    if(st==='submitted') nSub++;
+    else if(st==='late') nLate++;
+    else nMiss++;
+  });
+  document.getElementById('df-all-n').textContent = `(${STUDENTS.length})`;
+  document.getElementById('df-sub-n').textContent = `(${nSub})`;
+  document.getElementById('df-late-n').textContent = `(${nLate})`;
+  document.getElementById('df-miss-n').textContent = `(${nMiss})`;
+
+  const rows = STUDENTS.map((n,i) => ({n, i, st: sub[i]||'missing'}))
+    .filter(x => {
+      if (q && !x.n.includes(q)) return false;
+      if (detailFilter === 'all') return true;
+      return x.st === detailFilter;
+    });
+
+  const el = document.getElementById('detail-list');
+  if (!rows.length) { el.innerHTML = '<div class="empty">ไม่พบรายชื่อ</div>'; return; }
+
+  el.innerHTML = '<div style="border:.5px solid var(--border);border-radius:var(--radius);overflow:hidden">' +
+    rows.map(({n,i,st}) => `
+      <div class="student-item" style="padding:9px 12px;background:var(--bg)">
+        <div class="row">
+          <div>
+            <div class="name13">${n}</div>
+            <div class="sub11">เลขที่ ${i+1}</div>
+          </div>
+          <div style="display:flex;gap:4px;flex-shrink:0">
+            <button class="status-btn ${st==='submitted'?'submitted':''}" onclick="setStDetail('${detailAid}',${i},'submitted')">✓ ส่ง</button>
+            <button class="status-btn ${st==='late'?'late':''}" onclick="setStDetail('${detailAid}',${i},'late')">⏱ ช้า</button>
+            <button class="status-btn ${st==='missing'?'missing':''}" onclick="setStDetail('${detailAid}',${i},'missing')">✗</button>
+          </div>
+        </div>
+      </div>`).join('') + '</div>';
+}
+
+async function setStDetail(aid, idx, status) {
+  if(!fbUrl){alert('กรุณาตั้งค่า Firebase ก่อน');return;}
+  setSyncStatus('syncing','กำลังบันทึก...');
+  try {
+    await fbPatch(`submissions/${aid}`,{[idx]:status});
+    renderDetailList();
+  } catch(e){ setSyncStatus('offline','เกิดข้อผิดพลาด'); }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+startListener();
+renderStudents('');
+</script>
+</body>
+</html>
